@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.3.0 模板
+  html-style v1.3.1 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、章节分色、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -225,7 +225,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 @media (min-width: 900px) { body.hs-with-toc { padding-right: var(--hs-toc-w); } }
 .hs-doc { box-sizing: content-box; max-width: var(--hs-measure); margin-inline: auto; padding-inline: clamp(16px, 4vw, 56px); padding-block: 40px 120px; overflow-wrap: break-word; }
 
-/* 标题：h1 彩条；h2 章节色色条；h3 章节色竖条；标题不带序号和图标 */
+/* 标题：h1 彩条；h2 章节色色条；h3 章节色竖条；序号与标题同色，不带图标 */
 .hs-doc :is(h1, h2, h3, h4, h5, h6) { position: relative; font-weight: 700; line-height: 1.4; text-wrap: balance; scroll-margin-top: 24px; }
 .hs-doc h1 { font-size: 30px; letter-spacing: -.01em; margin: 0 0 16px; }
 .hs-doc h1::after { content: ""; display: block; width: 120px; height: 4px; margin-top: 12px; border-radius: 2px; background: linear-gradient(90deg, var(--hs-c1), var(--hs-c3), var(--hs-c4), var(--hs-c8)); }
@@ -236,7 +236,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-doc h5 { font-size: 16px; margin: 26px 0 8px; }
 .hs-doc h6 { font-size: 15px; margin: 22px 0 8px; color: var(--hs-muted); }
 .hs-meta { margin: -8px 0 28px; font-size: 13.5px; color: var(--hs-muted); }
-.hs-num { color: var(--ch, var(--hs-accent)); margin-right: .4em; font-variant-numeric: tabular-nums; }
+.hs-num { margin-right: .4em; font-variant-numeric: tabular-nums; }
 .hs-anchor { margin-left: .4em; color: var(--hs-faint); font-weight: 400; text-decoration: none; opacity: 0; }
 .hs-doc :is(h2, h3, h4, h5, h6):hover .hs-anchor, .hs-anchor:focus-visible { opacity: 1; }
 
@@ -353,7 +353,6 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-toc a:hover { color: var(--hs-text); }
 .hs-toc a[aria-current] { color: var(--ch); border-left-color: var(--ch); }
 .hs-toc code { font-size: .92em; background: none; padding: 0; color: inherit; }
-.hs-toc .hs-num { color: var(--ch); }
 .hs-toc-empty { margin: 8px; font-size: 13px; color: var(--hs-faint); }
 .hs-toc-toggle { display: none; }
 
@@ -397,7 +396,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.3.0</p>
+  <p class="hs-meta">html-style 插件模板 · v1.3.1</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -407,7 +406,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     </dl>
   </blockquote>
 
-  <h2 id="s1">字体与版心<a class="hs-anchor" href="#s1" aria-label="本节链接">#</a></h2>
+  <h2 id="s1"><span class="hs-num">1.</span>字体与版心<a class="hs-anchor" href="#s1" aria-label="本节链接">#</a></h2>
   <p>正文 Comic Sans MS 16px，行高 1.75。版心固定 988px，在大纲左侧的区域内水平居中；页面底色浅色 <code>#FCFCFB</code>、深色 <code>#151515</code>。每一章自动获得一种<strong>章节色</strong>，标题色条、表头、列表符号和大纲当前位置都跟着变。</p>
   <div class="hs-table"><table>
     <caption>标题层级</caption>
@@ -419,7 +418,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     </tbody>
   </table></div>
 
-  <h2 id="s2">图表<a class="hs-anchor" href="#s2" aria-label="本节链接">#</a></h2>
+  <h2 id="s2"><span class="hs-num">2.</span>图表<a class="hs-anchor" href="#s2" aria-label="本节链接">#</a></h2>
   <p>图表放进 <code>.hs-zoom</code>；<code>figure</code> 直接包含的图片、SVG、canvas 会被自动包进去。按 <kbd>F</kbd> 或双击进入全屏，<kbd>Esc</kbd> 退出。</p>
   <figure>
     <svg class="demo-diagram" viewBox="0 0 720 200" role="img" aria-label="三种图表操作">
@@ -439,15 +438,15 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     <figcaption><span>示例：内联 SVG 用 --hs-* 令牌配色，跟随主题</span></figcaption>
   </figure>
 
-  <h2 id="s3">标记与原生增强<a class="hs-anchor" href="#s3" aria-label="本节链接">#</a></h2>
-  <h3 id="s3-1">状态、记号与 ID<a class="hs-anchor" href="#s3-1" aria-label="本节链接">#</a></h3>
+  <h2 id="s3"><span class="hs-num">3.</span>标记与原生增强<a class="hs-anchor" href="#s3" aria-label="本节链接">#</a></h2>
+  <h3 id="s3-1"><span class="hs-num">3.1</span>状态、记号与 ID<a class="hs-anchor" href="#s3-1" aria-label="本节链接">#</a></h3>
   <p>状态词用标签：<span class="hs-tag" data-kind="ok">已修</span> <span class="hs-tag" data-kind="warn">未做</span> <span class="hs-tag" data-kind="danger">已删除</span> <span class="hs-tag" data-kind="info">新增</span>。图例符号用记号：<span class="hs-mark" data-kind="ok" title="承接">=</span> 承接、<span class="hs-mark" data-kind="warn" title="换表达">≈</span> 换表达、<span class="hs-mark" data-kind="danger" title="缺口">△</span> 缺口。行内 ID 自动着色，同前缀同色：<code>RT-01</code>、<code>RT-02</code>、<code>SW-R1.7</code>、<code>G15</code>。</p>
   <blockquote class="hs-callout" data-kind="warn">
     <p class="hs-callout-title">注意</p>
     <p>能用原生 HTML / CSS 实现的交互，不要再写脚本。颜色必须编码含义，不做纯装饰。</p>
   </blockquote>
 
-  <h3 id="s3-2">术语与折叠<a class="hs-anchor" href="#s3-2" aria-label="本节链接">#</a></h3>
+  <h3 id="s3-2"><span class="hs-num">3.2</span>术语与折叠<a class="hs-anchor" href="#s3-2" aria-label="本节链接">#</a></h3>
   <dl>
     <dt>版心</dt><dd>正文所在的固定宽度区域。</dd>
     <dt><abbr title="Table of Contents">TOC</abbr></dt><dd>右侧大纲，可筛选，随滚动高亮当前章节。</dd>
