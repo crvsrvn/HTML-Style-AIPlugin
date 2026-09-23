@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.6.3 模板
+  html-style v1.7.0 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -316,15 +316,32 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-doc tbody tr:hover { background: color-mix(in srgb, var(--hs-accent) 7%, transparent); }
 .hs-doc tbody tr:last-child td { border-bottom: 0; }
 .hs-doc td:first-child > code:only-child { white-space: nowrap; }
+/* 表格全屏：右上角图标按钮（悬停或聚焦时出现），全屏内横纵滚动、表头吸顶 */
+.hs-table-box { position: relative; margin: 16px 0 24px; }
+.hs-table-full { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; color: var(--hs-accent); background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 5px; cursor: pointer; opacity: 0; transition: opacity .15s; }
+.hs-table-full::before { content: ""; width: 15px; height: 15px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+.hs-table-full:hover { background: color-mix(in srgb, var(--hs-accent) 12%, var(--hs-surface)); }
+.hs-table-box:is(:hover, :focus-within, .is-full) .hs-table-full { opacity: 1; }
+@media (hover: none) { .hs-table-full { opacity: 1; } }
+.hs-table-box.is-full { position: fixed; inset: 0; z-index: 1000; margin: 0; display: flex; flex-direction: column; box-sizing: border-box; padding: calc(env(safe-area-inset-top, 0px) + 52px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px); background: var(--hs-bg); }
+.hs-table-box.is-full .hs-table-full { top: calc(env(safe-area-inset-top, 0px) + 12px); right: 24px; }
+.hs-table-box.is-full > .hs-table { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+/* 表头压住表体；首格再高一层，页面若把首列设为横向吸顶，角格不被其他表头盖住 */
+.hs-table-box.is-full thead th { position: sticky; top: 0; z-index: 2; }
+.hs-table-box.is-full thead th:first-child { z-index: 3; }
+.hs-table-box > .hs-table { margin: 0; transition: opacity .15s; }
+.hs-table-box.is-switching > .hs-table { opacity: 0; transition: none; }
 
 /* 图表：左/右键拖动平移，滚轮以指针为中心缩放，双击全屏 */
 .hs-doc figure { margin: 22px 0 28px; }
 .hs-doc figcaption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-top: 8px; font-size: 13px; color: var(--hs-muted); }
 .hs-doc figcaption > :first-child::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; background: var(--hs-accent); -webkit-mask: var(--hs-i-image) center / contain no-repeat; mask: var(--hs-i-image) center / contain no-repeat; }
-.hs-zoom { position: relative; height: 320px; overflow: hidden; background: var(--hs-plate); border: 1px solid var(--hs-line); border-radius: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; overscroll-behavior: contain; }
+.hs-zoom { position: relative; height: var(--hs-zoom-h, 320px); overflow: hidden; background: var(--hs-plate); border: 1px solid var(--hs-line); border-radius: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; overscroll-behavior: contain; }
 .hs-zoom[data-plate="none"] { background: var(--hs-surface); }
 .hs-zoom.is-dragging { cursor: grabbing; }
-.hs-zoom > :is(img, svg, canvas) { position: absolute; left: 0; top: 0; max-width: none; -webkit-user-drag: none; }
+/* 图保持原始尺寸，只用 transform 缩放：缩放和切换全屏都不重排大图 */
+.hs-zoom > :is(img, svg, canvas) { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; transition: opacity .15s; -webkit-user-drag: none; }
+.hs-zoom.is-switching > :is(img, svg, canvas) { opacity: 0; transition: none; }
 .hs-zoom.is-full { position: fixed; inset: 0; z-index: 1000; height: auto; border: 0; border-radius: 0; }
 .hs-zoom-bar { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 6px; }
 .hs-zoom.is-full .hs-zoom-bar { top: calc(env(safe-area-inset-top, 0px) + 12px); right: 12px; }
@@ -383,7 +400,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
   .hs-scrim { position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, .28); }
 }
 @media (min-width: 900px) { .hs-scrim { display: none; } }
-@media (prefers-reduced-motion: reduce) { .hs-toc, .hs-code > summary::before { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .hs-toc, .hs-code > summary::before, .hs-zoom > :is(img, svg, canvas), .hs-table-box > .hs-table { transition: none; } }
 </style>
 
 <style>
@@ -397,7 +414,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.6.3</p>
+  <p class="hs-meta">html-style 插件模板 · v1.7.0</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -658,6 +675,50 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     bindTocTree(toc);
   }
 
+  // ---------- 全屏：图表与表格共用 ----------
+  // 优先用浏览器全屏，不可用时退化为铺满视口的浮层，两种情况交互一致。
+  // 浏览器要等页面画出新尺寸的第一帧才完成全屏切换，大图、大表会拖慢这一帧（窗口先变黑，过一会儿才全屏），
+  // 所以切换时先隐藏内容（is-switching），新尺寸的第一帧画完后再 settle（如重新适应尺寸）并淡入
+  const bindFullscreen = (box, onToggle, settle = () => {}) => {
+    let waiting = false;
+    // 全屏期间用占位块撑住原位置，页面高度不变，退出后滚动位置不跳
+    const holder = document.createElement('div');
+    const isFull = () => box.classList.contains('is-full');
+    const apply = on => {
+      if (on) {
+        holder.style.cssText = `height: ${box.getBoundingClientRect().height}px; margin: ${getComputedStyle(box).margin}`;
+        box.before(holder);
+      } else {
+        holder.remove();
+      }
+      box.classList.toggle('is-full', on);
+      box.classList.add('is-switching');
+      onToggle(on);
+    };
+    const reveal = () => requestAnimationFrame(() => setTimeout(() => {
+      settle();
+      box.classList.remove('is-switching');
+    }));
+    const set = on => {
+      if (on === isFull()) return;
+      apply(on);
+      const req = on ? box.requestFullscreen?.() : document.fullscreenElement === box ? document.exitFullscreen() : null;
+      waiting = !!req;
+      if (req) req.catch(() => { waiting = false; reveal(); });
+      else reveal();
+    };
+    // 浏览器全屏的进出以 fullscreenchange 为准，包括浏览器自己处理的 Esc
+    document.addEventListener('fullscreenchange', () => {
+      const on = document.fullscreenElement === box;
+      if (!waiting && on === isFull()) return;
+      waiting = false;
+      if (on !== isFull()) apply(on);
+      reveal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
+    return () => set(!isFull());
+  };
+
   // ---------- 图表：左/右键拖动，滚轮定点缩放，双指缩放，双击全屏 ----------
   const bindZoomInput = (frame, view) => {
     const points = new Map();
@@ -748,9 +809,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       return natW > 0 && natH > 0;
     };
     const render = () => {
-      el.style.width = natW * s + 'px';
-      el.style.height = natH * s + 'px';
-      el.style.transform = `translate(${x}px, ${y}px)`;
+      el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
       ui.pct.textContent = Math.round(s * 100) + '%';
     };
     const isFull = () => frame.classList.contains('is-full');
@@ -761,7 +820,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       } else {
         fit = Math.min(1, w / natW);
         const h = clamp(natH * fit, 160, innerHeight * 0.7);
-        frame.style.height = h + 'px';
+        frame.style.setProperty('--hs-zoom-h', h + 'px');
         fit = Math.min(fit, h / natH);
       }
       s = fit;
@@ -784,33 +843,22 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       touched = true;
       render();
     };
-    // 全屏：优先用浏览器全屏，不可用时退化为铺满视口的浮层，两种情况交互一致
-    const setFull = on => {
-      if (on === isFull()) return;
-      frame.classList.toggle('is-full', on);
-      ui.fullBtn.textContent = on ? '退出全屏' : '全屏';
-      ui.fullBtn.dataset.icon = on ? 'shrink' : 'expand';
-      ui.hint.textContent = on ? HINT_FULL : HINT;
-      if (on) {
-        frame.style.height = '';
-        if (frame.requestFullscreen) frame.requestFullscreen().catch(() => {});
-      } else if (document.fullscreenElement === frame) {
-        document.exitFullscreen().catch(() => {});
-      }
-      reset();
-    };
-
     const start = () => {
       if (!measure()) return;
+      el.style.width = natW + 'px';
+      el.style.height = natH + 'px';
       el.style.maxWidth = 'none';
       el.setAttribute('draggable', 'false');
       if (!frame.hasAttribute('tabindex')) frame.tabIndex = 0;
       if (!frame.hasAttribute('aria-label')) frame.setAttribute('aria-label', '可缩放图表：拖动平移，滚轮缩放，双击全屏');
       ui = makeChrome(frame);
+      const toggleFull = bindFullscreen(frame, on => {
+        ui.fullBtn.textContent = on ? '退出全屏' : '全屏';
+        ui.fullBtn.dataset.icon = on ? 'shrink' : 'expand';
+        ui.hint.textContent = on ? HINT_FULL : HINT;
+      }, reset);
       ui.resetBtn.addEventListener('click', reset);
-      ui.fullBtn.addEventListener('click', () => setFull(!isFull()));
-      document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement !== frame) setFull(false); });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') setFull(false); });
+      ui.fullBtn.addEventListener('click', toggleFull);
 
       // 尺寸变化后在下一个任务里重新适应，避免在 ResizeObserver 回调内改尺寸
       let last = '', pending = 0;
@@ -821,7 +869,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
         if (!touched && !pending) pending = setTimeout(() => { pending = 0; reset(); });
       }).observe(frame);
       reset();
-      bindZoomInput(frame, { scale: () => s, pan, zoomAt, reset, toggleFull: () => setFull(!isFull()) });
+      bindZoomInput(frame, { scale: () => s, pan, zoomAt, reset, toggleFull });
     };
 
     if (el.tagName === 'IMG' && !el.complete) el.addEventListener('load', start, { once: true });
@@ -848,6 +896,24 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       const mo = new MutationObserver(() => { if (adopt()) mo.disconnect(); });
       mo.observe(m, { childList: true });
     }
+  });
+
+  // ---------- 表格：右上角按钮全屏；按钮放在滚动容器外，不随表格横向滚动 ----------
+  doc.querySelectorAll('.hs-table').forEach(t => {
+    const box = document.createElement('div');
+    box.className = 'hs-table-box';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hs-table-full';
+    t.replaceWith(box);
+    box.append(t, btn);
+    const label = on => {
+      btn.dataset.icon = on ? 'shrink' : 'expand';
+      btn.title = on ? '退出全屏（Esc）' : '全屏查看表格';
+      btn.setAttribute('aria-label', btn.title);
+    };
+    label(false);
+    btn.addEventListener('click', bindFullscreen(box, label));
   });
 })();
 </script>

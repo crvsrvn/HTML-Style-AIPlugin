@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "HTML 样式规范插件市场（Claude Code 版）。",
-    "version": "1.6.3"
+    "version": "1.7.0"
   },
   "plugins": [
     {
       "name": "html-style",
       "source": "./plugins/html-style",
       "description": "创建或修改 HTML 时统一样式：Comic Sans 16px、右侧无底色大纲、#FCFCFB / #151515 底色、988px 居中版心、提示块与状态标签、图表可拖动缩放并双击全屏，成品托管到云端。",
-      "version": "1.6.3",
+      "version": "1.7.0",
       "author": {
         "name": "HTML Style contributors"
       },
