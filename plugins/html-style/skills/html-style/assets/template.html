@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.7.0 模板
+  html-style v1.7.1 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -220,8 +220,7 @@
 body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.75 var(--hs-font); -webkit-text-size-adjust: 100%; }
 :focus-visible { outline: 2px solid var(--hs-accent); outline-offset: 2px; }
 
-/* 版心：在大纲左侧区域内居中、固定宽度 */
-@media (min-width: 900px) { body.hs-with-toc { padding-right: var(--hs-toc-w); } }
+/* 版心：在大纲左侧区域内居中、固定宽度（给大纲让位的 padding 见 hs-style-responsive） */
 .hs-doc { box-sizing: content-box; max-width: var(--hs-measure); margin-inline: auto; padding-inline: clamp(16px, 4vw, 56px); padding-block: 40px 120px; overflow-wrap: break-word; }
 
 /* 标题：h1 色条；h2 色条；h3 竖条；序号与标题同色，不带图标 */
@@ -316,6 +315,8 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-doc tbody tr:hover { background: color-mix(in srgb, var(--hs-accent) 7%, transparent); }
 .hs-doc tbody tr:last-child td { border-bottom: 0; }
 .hs-doc td:first-child > code:only-child { white-space: nowrap; }
+/* 全屏期间冻结页面（脚本 freezePage）：关闭滚动锚定，避免视口变化时浏览器自行调整滚动位置 */
+.hs-fs { overflow-anchor: none; }
 /* 表格全屏：右上角图标按钮（悬停或聚焦时出现），全屏内横纵滚动、表头吸顶 */
 .hs-table-box { position: relative; margin: 16px 0 24px; }
 .hs-table-full { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; color: var(--hs-accent); background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 5px; cursor: pointer; opacity: 0; transition: opacity .15s; }
@@ -323,7 +324,9 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-table-full:hover { background: color-mix(in srgb, var(--hs-accent) 12%, var(--hs-surface)); }
 .hs-table-box:is(:hover, :focus-within, .is-full) .hs-table-full { opacity: 1; }
 @media (hover: none) { .hs-table-full { opacity: 1; } }
-.hs-table-box.is-full { position: fixed; inset: 0; z-index: 1000; margin: 0; display: flex; flex-direction: column; box-sizing: border-box; padding: calc(env(safe-area-inset-top, 0px) + 52px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px); background: var(--hs-bg); }
+/* 与浏览器全屏的内置样式一致：浮层全屏也强制去掉外边距，不受所在上下文（如 details 子元素的边距）影响 */
+:is(.hs-zoom, .hs-table-box).is-full { margin: 0 !important; }
+.hs-table-box.is-full { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; padding: calc(env(safe-area-inset-top, 0px) + 52px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px); background: var(--hs-bg); }
 .hs-table-box.is-full .hs-table-full { top: calc(env(safe-area-inset-top, 0px) + 12px); right: 24px; }
 .hs-table-box.is-full > .hs-table { min-height: 0; overflow: auto; overscroll-behavior: contain; }
 /* 表头压住表体；首格再高一层，页面若把首列设为横向吸顶，角格不被其他表头盖住 */
@@ -376,7 +379,6 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 /* 回到顶部、跳转高亮：纯 CSS */
 .hs-top { position: fixed; z-index: 15; right: 24px; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); display: grid; place-items: center; width: 40px; height: 40px; font-size: 18px; color: var(--hs-accent); text-decoration: none; background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 50%; box-shadow: 0 2px 8px rgba(28, 36, 48, .08); }
-@media (min-width: 900px) { body.hs-with-toc .hs-top { right: calc(var(--hs-toc-w) + 24px); } }
 @supports (animation-timeline: scroll()) {
   .hs-top { animation: hs-appear linear both; animation-timeline: scroll(root); animation-range: 0 480px; }
   @keyframes hs-appear { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
@@ -385,7 +387,16 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
   .hs-doc :target { animation: hs-flash 1.8s ease-out; }
   @keyframes hs-flash { from { background-color: color-mix(in srgb, var(--hs-accent) 16%, transparent); } to { background-color: transparent; } }
 }
+</style>
 
+<style id="hs-style-responsive">
+/* 按视口宽度切换的规则单独成表：视口跨过 900px（如进出全屏）时，浏览器按变化的整张表失效样式，
+   单独成表后只重算这些选择器命中的元素，不会因主样式表里的宽泛选择器重算整页 */
+@media (min-width: 900px) {
+  body.hs-with-toc { padding-right: var(--hs-toc-w); }
+  body.hs-with-toc .hs-top { right: calc(var(--hs-toc-w) + 24px); }
+  .hs-scrim { display: none; }
+}
 @media (max-width: 899.98px) {
   .hs-doc { padding-block: 28px 96px; }
   .hs-doc :is(h1, h2, h3, h4, h5, h6) { scroll-margin-top: 64px; }
@@ -399,7 +410,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
   .hs-toc-toggle { display: block; position: fixed; z-index: 21; top: calc(env(safe-area-inset-top, 0px) + 12px); right: 16px; padding: 8px 12px; font: 700 13px/1 var(--hs-font); color: var(--hs-accent); background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 5px; box-shadow: 0 2px 8px rgba(28, 36, 48, .08); cursor: pointer; }
   .hs-scrim { position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, .28); }
 }
-@media (min-width: 900px) { .hs-scrim { display: none; } }
+/* 放在窄屏规则之后，才能覆盖大纲抽屉的过渡 */
 @media (prefers-reduced-motion: reduce) { .hs-toc, .hs-code > summary::before, .hs-zoom > :is(img, svg, canvas), .hs-table-box > .hs-table { transition: none; } }
 </style>
 
@@ -414,7 +425,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.7.0</p>
+  <p class="hs-meta">html-style 插件模板 · v1.7.1</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -678,19 +689,35 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
   // ---------- 全屏：图表与表格共用 ----------
   // 优先用浏览器全屏，不可用时退化为铺满视口的浮层，两种情况交互一致。
   // 浏览器要等页面画出新尺寸的第一帧才完成全屏切换，大图、大表会拖慢这一帧（窗口先变黑，过一会儿才全屏），
-  // 所以切换时先隐藏内容（is-switching），新尺寸的第一帧画完后再 settle（如重新适应尺寸）并淡入
+  // 所以切换时先隐藏内容（is-switching），新尺寸的第一帧画完后再 settle（如重新适应尺寸）并淡入。
+  // 另外全屏期间冻结页面：视口宽度一变，长页面的正文会整页重排，这一帧可达上百毫秒；
+  // 冻结时把全屏元素所在的顶层块（通常是 .hs-doc）固定为当前宽度，正文排版不受视口影响，退出后直接复用原布局。
+  // 页面高度保持不变，滚动位置在解冻时恢复
+  let frozen = null;
+  const freezePage = box => {
+    const root = document.documentElement;
+    let top = box;
+    while (top.parentElement !== document.body) top = top.parentElement;
+    frozen = { y: scrollY, top, width: top.style.width };
+    top.style.width = getComputedStyle(top).width;
+    root.style.minHeight = root.scrollHeight + 'px';
+    root.classList.add('hs-fs');
+  };
+  const thawPage = () => {
+    if (!frozen) return;
+    const root = document.documentElement;
+    root.classList.remove('hs-fs');
+    root.style.minHeight = '';
+    frozen.top.style.width = frozen.width;
+    scrollTo(0, frozen.y);
+    frozen = null;
+  };
+
   const bindFullscreen = (box, onToggle, settle = () => {}) => {
     let waiting = false;
-    // 全屏期间用占位块撑住原位置，页面高度不变，退出后滚动位置不跳
-    const holder = document.createElement('div');
     const isFull = () => box.classList.contains('is-full');
     const apply = on => {
-      if (on) {
-        holder.style.cssText = `height: ${box.getBoundingClientRect().height}px; margin: ${getComputedStyle(box).margin}`;
-        box.before(holder);
-      } else {
-        holder.remove();
-      }
+      if (on) freezePage(box);
       box.classList.toggle('is-full', on);
       box.classList.add('is-switching');
       onToggle(on);
@@ -704,8 +731,13 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       apply(on);
       const req = on ? box.requestFullscreen?.() : document.fullscreenElement === box ? document.exitFullscreen() : null;
       waiting = !!req;
-      if (req) req.catch(() => { waiting = false; reveal(); });
-      else reveal();
+      // 浏览器全屏在 fullscreenchange（视口已恢复）时解冻；浮层没有改视口，立即解冻
+      if (req) {
+        req.catch(() => { waiting = false; if (!isFull()) thawPage(); reveal(); });
+      } else {
+        if (!on) thawPage();
+        reveal();
+      }
     };
     // 浏览器全屏的进出以 fullscreenchange 为准，包括浏览器自己处理的 Esc
     document.addEventListener('fullscreenchange', () => {
@@ -713,6 +745,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       if (!waiting && on === isFull()) return;
       waiting = false;
       if (on !== isFull()) apply(on);
+      if (!on) thawPage();
       reveal();
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
