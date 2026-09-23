@@ -1,6 +1,6 @@
 ---
 name: html-style
-description: 创建、修改、重排或发布任何 HTML 成品时必须使用——包括 HTML 文档、报告、方案、说明页、仪表盘、Claude Artifacts、把 Markdown 转成 HTML、更新已有 Artifact 链接。统一样式：Comic Sans MS 16px、右侧大纲、Claude 桌面版背景色、内容居中定宽、SVG 等图表可左右键拖动并以指针为中心滚轮缩放；成品托管到 AI 云端（如 Claude Artifacts），不交付本地 .html 文件。
+description: 创建、修改、重排或发布任何 HTML 成品时必须使用——包括 HTML 文档、报告、方案、说明页、仪表盘、Claude Artifacts、把 Markdown 转成 HTML、更新已有 Artifact 链接。统一样式：Comic Sans MS 16px、右侧大纲、底色 #FCFCFB / #151515、988px 居中版心、SVG 等图表可左右键拖动、滚轮定点缩放、双击全屏，并尽量用原生 HTML/CSS 提升可读性；成品托管到 AI 云端（如 Claude Artifacts），不交付本地 .html 文件。
 ---
 
 # HTML 样式规范
@@ -22,53 +22,61 @@ description: 创建、修改、重排或发布任何 HTML 成品时必须使用�
 | 项 | 要求 |
 |----|------|
 | 字体 | 正文 `Comic Sans MS`，16px；回退链见模板 `--hs-font`（Comic Neue → Chalkboard SE → 系统中文字体） |
-| 大纲 | 放在版心右侧，由模板脚本从标题自动生成并随滚动高亮；视口窄于 1240px 时收进右上角「大纲」按钮，从右侧滑出 |
-| 背景 | Claude 桌面版页面底色（`--cds-surface-1`）：浅色 `#FCFCFB`，深色 `#151515`，跟随系统 / 宿主主题 |
-| 版心 | 内容水平居中，固定宽度 760px；窄屏两侧各留 16px |
-| 图表 | SVG、图片化图表、canvas、Mermaid 一律放进 `.hs-zoom` 视窗。左键、右键都能拖动平移；滚轮在任意位置以指针为中心缩放；双击或「复位」按钮回到适应宽度 |
+| 背景 | 页面底色浅色 `#FCFCFB`，深色 `#151515`，跟随系统 / 宿主主题 |
+| 大纲 | 放在右侧：固定的整高侧栏，由模板脚本从标题生成，可筛选，随滚动高亮；视口窄于 900px 时收进右上角「大纲」按钮，从右侧滑出 |
+| 版心 | 固定宽度 988px，在大纲左侧的区域内水平居中；空间不足时收窄，两侧至少留 16px |
+| 图表 | SVG、图片化图表、canvas、Mermaid 一律放进 `.hs-zoom` 视窗：<br>• 左键、右键都能拖动平移<br>• 滚轮在任意位置以指针为中心缩放<br>• 双击进入全屏，全屏里同样可拖动、缩放<br>• 再次双击或按 Esc 退出全屏<br>• 「复位」按钮回到适应尺寸 |
+| 可读性 | 尽量使用原生 HTML / CSS 能力让文档易读（见[原生可读性增强](#原生可读性增强)）；能用原生能力实现的交互，不写脚本 |
 | 交付 | 托管到 AI 云端并给出链接，不把本地 `.html` 当成品（见[托管](#托管)） |
 
-## 默认参数
+其余视觉参数（配色、字号层级、表格与代码块样式）以模板为准，不要另起一套。
 
-以下参数可以在单页内微调，但不能改动硬性项。
+## 原生可读性增强
 
-| 参数 | 值 | 依据 |
-|------|----|------|
-| 正文行高 | 1.75 | Typora 1.6、Obsidian 1.5 针对西文；中文需要更松 |
-| 段距 | 1.1em | Typora / Obsidian 约 1em |
-| 标题 | h1 36px / h2 26px / h3 20px / h4 17px，粗 700，行高 1.25–1.5 | Apple 官网标题紧、正文松的层级 |
-| 标题上距 | h2 2.6em，h3 2em | 章节之间留足呼吸 |
-| 代码 | 等宽 14px，行高 1.6，底色面板，圆角 12px | |
-| 表格 | 15px，只画横线，表头线加深，窄屏在容器内横向滚动 | 简约品牌官网风格 |
-| 页边 | 上 88px，下 160px | |
-| 大纲 | 宽 ≤220px，距版心 48px，13.5px | |
-| 文字色 | 主 `#0B0B0B` / `#F0EFEC`，次 `#52514E` / `#C3C2B7`，弱 `#6D6B67` / `#898781` | Claude 桌面版 cds 灰阶 |
-| 强调色 | `#184F95` / `#6DA7EC` | Claude 桌面版 `--cds-text-accent` |
-| 分隔线 | `#E1E0D9` / `#2C2C2A` | Claude 桌面版 cds 灰阶 |
+以下能力都不依赖脚本，按内容需要自由组合。
+
+| 能力 | 写法 | 用在哪里 |
+|------|------|----------|
+| 折叠代码 | `<details class="hs-code" [open]><summary>语言<span class="hs-code-meta">N 行</span></summary><pre><code>…</code></pre></details>` | 带语言标注的代码块；超过 25 行默认折叠，其余默认展开 |
+| 折叠段落 | `<details><summary>标题</summary>…</details>` | 附录、推导过程、次要细节、长清单 |
+| 术语表 | `<dl><dt>术语</dt><dd>解释</dd></dl>` | 术语、字段、参数说明 |
+| 脚注弹层 | `<button type="button" class="hs-ref" popovertarget="fn-1">1</button>` + `<div popover id="fn-1" class="hs-pop">…</div>` | 脚注、补充解释，不打断正文 |
+| 提示块 | `<aside>…</aside>`；警告用 `<aside data-kind="warn">` | 注意事项、结论摘要 |
+| 行内语义 | `<kbd>`、`<mark>`、`<abbr title="…">` | 按键、重点句、缩写 |
+| 表格 | `<div class="hs-table"><table><caption>…</caption>…</table></div>` | 模板自带表头底色、斑马纹、悬停高亮、窄屏横向滚动 |
+| 标题编号与锚点 | `<span class="hs-num">2.1</span>`、`<a class="hs-anchor" href="#id">#</a>` | 长文档的章节编号与可分享链接 |
+| 阅读进度与回到顶部 | 模板里的 `.hs-progress` 与 `.hs-top` 两行标记 | 所有长文档，纯 CSS 滚动驱动 |
+| 跳转高亮 | 模板自带 `:target` 样式 | 从大纲或链接跳转后短暂高亮目标 |
+
+原则：
+
+- 折叠只用于次要内容；结论、关键数据不折叠。
+- 不要把正文拆成只能靠脚本显示的片段。`<details>` 的内容在浏览器页内搜索中仍可命中。
 
 ## 工作流程
 
 ### 新建页面
 
 1. 读取本技能目录下的 `assets/template.html`。
-2. 以下三块原样复制，不要改写、删减或"重新实现"：
+2. 以下几块原样复制，不要改写、删减或"重新实现"：
    - 字体 `<link>`
    - `<style id="hs-style">`
+   - `<div class="hs-progress">` 与 `<a class="hs-top">` 两行标记
    - `<script id="hs-script">`
 3. 正文全部写在 `<main class="hs-doc">` 里：
-   - 一个 `h1` 作标题，其后可跟 `<p class="hs-meta">` 写日期、来源。
+   - 一个 `h1` 作标题，`id="top"`，其后可跟 `<p class="hs-meta">` 写日期、来源。
    - 章节用 `h2` / `h3`，默认这两级进大纲；要收录 `h4` 时，给 `main` 加 `data-toc-levels="2,3,4"`。
    - 不要手写大纲，脚本会生成。
-4. 表格包一层 `<div class="hs-table">`。
-5. 图表写成 `<figure><div class="hs-zoom">img / svg / canvas</div><figcaption>…</figcaption></figure>`：
+4. 图表写成 `<figure><div class="hs-zoom">img / svg / canvas</div><figcaption>…</figcaption></figure>`：
    - `figure` 的直接子级 img / svg / canvas，以及 Mermaid 渲染出的 SVG，会被脚本自动包进 `.hs-zoom`。
    - 底板：图片默认白色底板，适合 PlantUML、Mermaid 导出图、截图这类自带白底和深色线条的图。
-   - 内联 SVG 和 canvas 默认透明底板，要求用 `var(--hs-*)` 跟随主题配色。
+   - 内联 SVG 和 canvas 默认用面板色底板，要求用 `var(--hs-*)` 跟随主题配色。
    - 需要反过来时，在 `.hs-zoom` 上设 `data-plate="light"` 或 `data-plate="none"`。
+5. 按[原生可读性增强](#原生可读性增强)组织内容。
 6. 页面特有样式另起一个 `<style>`：只用 `--hs-*` 令牌取色，不覆盖硬性项。
 7. 宿主要求完整文档时（非 Artifact），外面包一层 `<!doctype html><html lang="zh-CN"><head>…</head><body>…</body></html>`：
    - `head` 里放 `<meta charset="utf-8">`、`<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">`，以及 `title`、字体 `link`、`style`。
-   - `script` 放在 `body` 末尾。
+   - 其余标记和 `script` 放在 `body` 里，`script` 放在末尾。
 
 ### 修改已有页面
 
@@ -76,10 +84,12 @@ description: 创建、修改、重排或发布任何 HTML 成品时必须使用�
 2. 保留全部内容：文字、标题 `id`、页内锚点、表格、代码高亮、图片数据、附带文件（如 PlantUML 源文件）。
 3. 删除以下旧结构：
    - 旧字体链接和全局样式。
-   - 旧大纲，包括左侧或顶部目录、目录筛选框、目录脚本。
+   - 旧大纲，包括目录、筛选框和目录脚本。
    - 旧的图片缩放、切换按钮及其脚本。
-4. 按"新建页面"第 2–6 步套上模板。旧结构特有的类名（代码块标题、交叉引用标记、标题锚点等）在页面特有样式里改用 `--hs-*` 令牌。
-5. 页面较大（例如含大量 base64 图）时，用脚本做结构替换，不要手工逐段改。
+4. 按"新建页面"第 2–6 步套上模板：
+   - 旧类名换成模板类名，例如标题编号 → `hs-num`，锚点 → `hs-anchor`，表格容器 → `hs-table`，带语言标注的代码块 → `details.hs-code`。
+   - 模板没有对应物的旧类名，在页面特有样式里改用 `--hs-*` 令牌。
+5. 页面较大（例如含大量 base64 图）时，用脚本做结构替换，不要手工逐段改。替换前后核对标题、表格、代码块、图片的数量一致。
 
 ## 托管
 
@@ -95,8 +105,9 @@ description: 创建、修改、重排或发布任何 HTML 成品时必须使用�
 ## 发布前自检
 
 - [ ] 正文字体为 Comic Sans MS（或其回退），16px。
-- [ ] 视口 ≥1240px 时大纲在版心右侧；更窄时有「大纲」按钮和右侧抽屉。
-- [ ] 背景为 `#FCFCFB` / `#151515`，浅色和深色主题下文字都清晰。
-- [ ] 版心 760px 居中，页面没有横向滚动；只有表格、代码块、图表在自己的容器内滚动或缩放。
-- [ ] 每个图表都能左键、右键拖动，滚轮以指针为中心缩放，双击复位。
+- [ ] 页面底色为 `#FCFCFB` / `#151515`，浅色和深色主题下文字都清晰。
+- [ ] 视口 ≥900px 时大纲是右侧整高侧栏；更窄时有「大纲」按钮和右侧抽屉。
+- [ ] 版心最宽 988px 并居中，页面没有横向滚动；只有表格、代码块、图表在自己的容器内滚动或缩放。
+- [ ] 每个图表都能左键、右键拖动，滚轮以指针为中心缩放，双击全屏，全屏内同样可拖动缩放，双击或 Esc 退出。
+- [ ] 长代码、附录等次要内容已用原生折叠；没有为原生能力可以实现的交互写脚本。
 - [ ] 交付的是云端链接，或已如实说明无法托管。

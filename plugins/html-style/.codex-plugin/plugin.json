@@ -1,7 +1,7 @@
 {
   "name": "html-style",
-  "version": "1.0.0",
-  "description": "创建或修改 HTML 时统一样式：Comic Sans 16px、右侧大纲、Claude 桌面版底色、居中定宽、图表可拖动缩放，成品托管到云端。",
+  "version": "1.1.0",
+  "description": "创建或修改 HTML 时统一样式：Comic Sans 16px、右侧大纲、#FCFCFB / #151515 底色、988px 居中版心、图表可拖动缩放并双击全屏，成品托管到云端。",
   "author": {
     "name": "HTML Style contributors"
   },
@@ -17,14 +17,15 @@
   "interface": {
     "displayName": "HTML 样式规范",
     "shortDescription": "创建或修改 HTML 时自动套用统一样式并托管到云端。",
-    "longDescription": "每次创建或修改 HTML 时套用同一套样式：Comic Sans MS 16px、右侧自动大纲、Claude 桌面版背景色、内容居中定宽、SVG 等图表支持左右键拖动与滚轮定点缩放；成品优先托管到云端而不是交付本地文件。",
+    "longDescription": "每次创建或修改 HTML 时套用同一套样式：Comic Sans MS 16px、右侧可筛选大纲、#FCFCFB / #151515 页面底色、988px 居中版心；SVG 等图表支持左右键拖动、滚轮定点缩放与双击全屏；优先用原生 HTML/CSS 提升可读性；成品托管到云端而不是交付本地文件。",
     "developerName": "HTML Style contributors",
     "category": "Productivity",
     "capabilities": [
       "HTML styling",
       "Right-side outline",
       "Zoomable diagrams",
-      "Light and dark themes"
+      "Fullscreen diagrams",
+      "Native HTML readability"
     ],
     "defaultPrompt": [
       "把这份 Markdown 做成 HTML 文档。",

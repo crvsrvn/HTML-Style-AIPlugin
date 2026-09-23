@@ -8,14 +8,15 @@
 
 | 项 | 规范 |
 |----|------|
-| 字体 | Comic Sans MS，16px，行高 1.75；回退到 Comic Neue、系统中文字体 |
-| 大纲 | 右侧，从标题自动生成、随滚动高亮；窄于 1240px 时收成右上角按钮 + 右侧抽屉 |
-| 背景 | Claude 桌面版页面底色：浅色 `#FCFCFB`，深色 `#151515`，跟随主题 |
-| 版心 | 居中，固定 760px |
-| 图表 | SVG、图片、canvas、Mermaid：左键 / 右键拖动平移，滚轮以指针为中心缩放，双击复位 |
+| 字体 | Comic Sans MS，16px；回退到 Comic Neue、系统中文字体 |
+| 背景 | 浅色 `#FCFCFB`，深色 `#151515`，跟随主题 |
+| 大纲 | 右侧整高侧栏，从标题自动生成，可筛选、随滚动高亮；窄于 900px 时收成右上角按钮 + 右侧抽屉 |
+| 版心 | 固定 988px，在大纲左侧区域内居中 |
+| 图表 | SVG、图片、canvas、Mermaid：左键 / 右键拖动平移，滚轮以指针为中心缩放，双击全屏；全屏内交互相同，双击或 Esc 退出 |
+| 可读性 | 优先用原生 HTML / CSS：折叠代码与附录、术语表、脚注弹层、提示块、阅读进度条、回到顶部、跳转高亮 |
 | 交付 | Claude：Artifact；Codex：`sites-hosting` 等托管技能，不可用时如实说明 |
 
-完整参数（标题比例、段距、代码、表格、颜色）见 [SKILL.md](plugins/html-style/skills/html-style/SKILL.md)，可直接运行的样式与脚本见 [template.html](plugins/html-style/skills/html-style/assets/template.html)。
+完整规则见 [SKILL.md](plugins/html-style/skills/html-style/SKILL.md)，可直接运行的样式、脚本与示例见 [template.html](plugins/html-style/skills/html-style/assets/template.html)。
 
 ## 安装
 
@@ -53,6 +54,20 @@ codex plugin add html-style@html-style-aiplugin
 
 把 `OWNER` 换成实际的 GitHub 组织或用户名，也可以传 HTTPS / SSH 地址。
 
+### 更新
+
+两个平台安装的都是插件快照。改动仓库后需要重装才能生效：
+
+```bash
+claude plugin uninstall html-style@html-style-aiplugin
+claude plugin install html-style@html-style-aiplugin
+```
+
+```powershell
+codex plugin remove html-style@html-style-aiplugin
+codex plugin add html-style@html-style-aiplugin
+```
+
 ## 目录结构
 
 ```
@@ -63,27 +78,16 @@ plugins/html-style/
   .codex-plugin/plugin.json                Codex 插件清单
   skills/html-style/
     SKILL.md                               规范与工作流程（两个平台共用）
-    assets/template.html                   样式、大纲脚本、图表缩放脚本与示例
+    assets/template.html                   样式、大纲脚本、图表缩放与全屏脚本、示例
 ```
 
 ## 使用
 
 不需要记命令。直接说"把这份方案做成 HTML 文档""按样式规范改一下这个 Artifact：<链接>"即可，Skill 会在涉及 HTML 的任务里自动触发。
 
-## 设计依据
-
-- **颜色**：取自 Claude 桌面版 v2.7032 的 cds 设计令牌。
-  - 页面底色：`index.html` 声明 `--cds-page-bg: var(--cds-surface-1)`，`theme-color` 为 `#fcfcfb` / `#151515`。
-  - 文字：`--cds-text-primary` / `--cds-text-secondary`。
-  - 强调色：`--cds-text-accent`。
-- **排版**：
-  - 版心宽度参考 Obsidian 700px 与 Typora 860px 取中。
-  - 行高在 Typora 1.6 的基础上为中文放宽到 1.75。
-  - 标题紧、正文松的层级参考 Apple 官网。
-
 ## 维护
 
-- 改样式或脚本时只改 `template.html`，同步更新 `SKILL.md` 里的参数表。
+- 改样式或脚本时只改 `template.html`，同步更新 `SKILL.md` 里的规则。
 - 四个清单文件里的版本号保持一致。
 
 ## 许可证
