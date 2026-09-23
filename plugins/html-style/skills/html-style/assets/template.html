@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.5.0 模板
+  html-style v1.6.0 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -397,7 +397,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.5.0</p>
+  <p class="hs-meta">html-style 插件模板 · v1.6.0</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -494,7 +494,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     });
   };
 
-  // ---------- 右侧大纲：从标题生成条目，每条记录所属的第一层标题 ----------
+  // ---------- 右侧大纲：从标题生成条目，每条记录父条目与所属的第一层条目 ----------
   const createToc = heads => {
     const h1 = doc.querySelector('h1');
     if (h1 && !h1.id) h1.id = 'top';
@@ -510,12 +510,14 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     title.href = h1 ? '#' + h1.id : '#';
     nav.querySelector('.hs-toc-filter').placeholder = `筛选标题（共 ${heads.length} 节）`;
     const list = nav.querySelector('ol');
-    const top = Math.min(...heads.map(h => +h.tagName[1]));
-    let group = -1;
-    const items = heads.map((h, i) => {
+    const items = [];
+    const stack = [];
+    heads.forEach((h, i) => {
       if (!h.id) h.id = 'hs-h' + (i + 1);
       const level = +h.tagName[1];
-      if (level === top) group = i;
+      while (stack.length && items[stack[stack.length - 1]].level >= level) stack.pop();
+      const parent = stack.length ? stack[stack.length - 1] : -1;
+      stack.push(i);
       const li = document.createElement('li');
       li.className = 'hs-l' + level;
       const a = document.createElement('a');
@@ -523,11 +525,11 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       a.innerHTML = plainLabel(h).innerHTML;
       li.append(a);
       list.append(li);
-      return { head: h, li, a, level, group };
+      items.push({ head: h, li, a, level, parent, root: parent < 0 ? i : items[parent].root });
     });
     document.body.append(nav);
     document.body.classList.add('hs-with-toc');
-    return { nav, items, top };
+    return { nav, items };
   };
 
   // 窄屏：大纲收进右上角按钮，从右侧滑出
@@ -552,10 +554,11 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
   };
 
-  // 阅读位置：越过阅读线（视口 30% 处）的最后一个标题；滚到页底时取视口内最后一个标题，保证末尾章节也能成为当前位置
+  // 阅读位置：越过阅读线（视口 30% 处）的最后一个标题，还没读到任何标题时为 -1；
+  // 滚到页底时取视口内最后一个标题，保证末尾章节也能成为当前位置
   const locateHeading = items => {
     const line = Math.max(96, innerHeight * 0.3);
-    let idx = 0;
+    let idx = -1;
     for (let i = 0; i < items.length; i++) {
       if (items[i].head.getBoundingClientRect().top <= line) idx = i; else break;
     }
@@ -568,39 +571,40 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
   };
 
   // 折叠 / 展开、筛选、滚动高亮：
-  // 默认折叠，只显示第一层；点第一层标题展开它的下一层（同时只展开一个）；展开模式显示全部；筛选时显示全部匹配项
-  const bindTocTree = ({ nav, items, top }) => {
+  // 折叠模式（默认）显示第一层，以及当前位置和它各级上级的下一层子标题，其余分支收起；当前位置来自点击或滚动。
+  // 展开模式显示全部；筛选时显示全部匹配项
+  const bindTocTree = ({ nav, items }) => {
     const panel = nav.querySelector('.hs-toc-panel');
     const filter = nav.querySelector('.hs-toc-filter');
     const empty = nav.querySelector('.hs-toc-empty');
     const fold = nav.querySelector('.hs-toc-fold');
-    const childLevel = new Map();
-    items.forEach(it => {
-      if (it.level > top && !(childLevel.get(it.group) <= it.level)) childLevel.set(it.group, it.level);
-    });
-    let expanded = false, open = -1, current = -1, queued = false, pinned = -1, pinnedUntil = 0;
+    let expanded = false, current = -1, queued = false, pinned = -1, pinnedUntil = 0;
 
-    // 当前位置所属的第一层标题也挂上标记；返回面板里实际可见的那一项，供滚动定位
+    const pathOf = i => {
+      const path = new Set();
+      for (; i >= 0; i = items[i].parent) path.add(i);
+      return path;
+    };
+    // 当前位置所属的第一层条目也挂上标记；返回面板里实际可见的那一项，供滚动定位
     const markCurrent = () => {
       items.forEach(it => it.a.classList.remove('is-within'));
       if (current < 0) return null;
       const it = items[current];
-      if (it.group < 0 || it.group === current) return it.a;
-      items[it.group].a.classList.add('is-within');
-      return it.li.hidden ? items[it.group].a : it.a;
+      if (it.root !== current) items[it.root].a.classList.add('is-within');
+      return it.li.hidden ? items[it.root].a : it.a;
     };
     const keepVisible = a => {
-      if (!a) return;
+      if (!a || a.parentNode.hidden) return;
       const box = panel.getBoundingClientRect(), r = a.getBoundingClientRect();
       if (r.top < box.top + 56) panel.scrollTop += r.top - box.top - 56;
       else if (r.bottom > box.bottom - 24) panel.scrollTop += r.bottom - box.bottom + 24;
     };
     const render = () => {
       const q = filter.value.trim().toLowerCase();
+      const path = pathOf(current);
       let shown = 0;
       items.forEach(it => {
-        const visible = q ? it.a.textContent.toLowerCase().includes(q)
-          : expanded || it.level === top || it.group < 0 || (it.group === open && it.level === childLevel.get(it.group));
+        const visible = q ? it.a.textContent.toLowerCase().includes(q) : expanded || it.parent < 0 || path.has(it.parent);
         it.li.hidden = !visible;
         if (visible) shown++;
       });
@@ -610,7 +614,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       fold.setAttribute('aria-label', label);
       fold.setAttribute('aria-expanded', String(expanded));
       fold.title = label;
-      markCurrent();
+      return markCurrent();
     };
     // 点击大纲后锁定所点条目，直到用户自己滚动，或该标题离开视口（点击后 1.2 秒内平滑滚动不算）
     const spy = () => {
@@ -623,20 +627,18 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       if (idx === current) return;
       if (current >= 0) items[current].a.removeAttribute('aria-current');
       current = idx;
-      items[idx].a.setAttribute('aria-current', 'location');
-      keepVisible(markCurrent());
+      if (idx >= 0) items[idx].a.setAttribute('aria-current', 'location');
+      keepVisible(render());
     };
     const unpin = () => { pinned = -1; };
 
-    fold.addEventListener('click', () => { expanded = !expanded; open = -1; render(); });
+    fold.addEventListener('click', () => { expanded = !expanded; keepVisible(render()); });
     filter.addEventListener('input', render);
     nav.addEventListener('click', e => {
       const idx = items.findIndex(x => x.a === e.target.closest('a'));
       if (idx < 0) return;
-      if (items[idx].level === top && !expanded) open = items[idx].group;
       pinned = idx;
       pinnedUntil = performance.now() + 1200;
-      render();
       spy();
     });
     addEventListener('wheel', unpin, { passive: true });
