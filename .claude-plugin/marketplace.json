@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "html-style-aiplugin",
+  "owner": {
+    "name": "HTML Style contributors"
+  },
+  "metadata": {
+    "description": "HTML 样式规范插件市场（Claude Code 版）。",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "html-style",
+      "source": "./plugins/html-style",
+      "description": "创建或修改 HTML 时统一样式：Comic Sans 16px、右侧大纲、Claude 桌面版底色、居中定宽、图表可拖动缩放，成品托管到云端。",
+      "version": "1.0.0",
+      "author": {
+        "name": "HTML Style contributors"
+      },
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": ["html", "style", "artifact", "document", "toc"]
+    }
+  ]
+}
