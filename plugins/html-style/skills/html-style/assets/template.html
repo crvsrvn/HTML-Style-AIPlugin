@@ -1,7 +1,7 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.2.0 模板
-  - 字体链接、样式块 hs-style、脚本块 hs-script，以及进度条与回到顶部两处标记，原样复制，不要改写或删减。
+  html-style v1.3.0 模板
+  - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、章节分色、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
 -->
@@ -225,14 +225,11 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 @media (min-width: 900px) { body.hs-with-toc { padding-right: var(--hs-toc-w); } }
 .hs-doc { box-sizing: content-box; max-width: var(--hs-measure); margin-inline: auto; padding-inline: clamp(16px, 4vw, 56px); padding-block: 40px 120px; overflow-wrap: break-word; }
 
-/* 标题：h1 彩条；h2 章节色图标块 + 色条；h3 章节色竖条 */
+/* 标题：h1 彩条；h2 章节色色条；h3 章节色竖条；标题不带序号和图标 */
 .hs-doc :is(h1, h2, h3, h4, h5, h6) { position: relative; font-weight: 700; line-height: 1.4; text-wrap: balance; scroll-margin-top: 24px; }
 .hs-doc h1 { font-size: 30px; letter-spacing: -.01em; margin: 0 0 16px; }
 .hs-doc h1::after { content: ""; display: block; width: 120px; height: 4px; margin-top: 12px; border-radius: 2px; background: linear-gradient(90deg, var(--hs-c1), var(--hs-c3), var(--hs-c4), var(--hs-c8)); }
 .hs-doc h2 { font-size: 24px; margin: 64px 0 18px; padding-top: 24px; border-top: 1px solid var(--hs-line); background: linear-gradient(var(--ch), var(--ch)) 0 0 / 88px 3px no-repeat border-box; }
-.hs-doc h2[data-icon] { padding-left: 52px; }
-.hs-doc h2[data-icon]::before { content: ""; position: absolute; left: 0; top: calc(24px + .7em - 19px); width: 38px; height: 38px; border-radius: 10px; background: color-mix(in srgb, var(--ch) 15%, transparent); }
-.hs-doc h2[data-icon]::after { content: ""; position: absolute; left: 9px; top: calc(24px + .7em - 10px); width: 20px; height: 20px; background: var(--ch); -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
 .hs-doc h3 { font-size: 20px; margin: 44px 0 14px; padding-left: 14px; }
 .hs-doc h3::before { content: ""; position: absolute; left: 0; top: .3em; bottom: .3em; width: 4px; border-radius: 2px; background: var(--ch); }
 .hs-doc h4 { font-size: 17.5px; margin: 32px 0 10px; }
@@ -250,7 +247,6 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-doc ol > li::marker { font-weight: 700; }
 .hs-doc li > :is(ul, ol) { margin: 4px 0; }
 .hs-doc strong { font-weight: 700; }
-.hs-doc :is(p, li, dd) strong { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--ch) 20%, transparent) 0); }
 .hs-doc a { color: var(--hs-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .hs-doc hr { border: 0; border-top: 1px solid var(--hs-line); margin: 32px 0; }
 .hs-doc :is(blockquote, aside) { margin: 16px 0 22px; padding: 12px 18px; background: var(--hs-quote-bg); border-left: 3px solid var(--hs-accent); }
@@ -340,36 +336,32 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .hs-zoom-hint { position: absolute; left: 8px; bottom: 8px; padding: 3px 8px; font-size: 12px; line-height: 1.4; color: var(--hs-muted); background: var(--hs-surface); border: 1px solid var(--hs-line-soft); border-radius: 4px; pointer-events: none; }
 .hs-zoom.is-full .hs-zoom-hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); left: 12px; }
 
-/* 右侧大纲：章节色图标、当前位置用章节色高亮 */
-.hs-toc { position: fixed; z-index: 20; top: 0; right: 0; bottom: 0; box-sizing: border-box; width: var(--hs-toc-w); display: flex; flex-direction: column; padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); background: var(--hs-side); border-left: 1px solid var(--hs-line); }
+/* 右侧大纲：无底色；当前位置用章节色文字 + 左侧细条 */
+.hs-toc { position: fixed; z-index: 20; top: 0; right: 0; bottom: 0; box-sizing: border-box; width: var(--hs-toc-w); display: flex; flex-direction: column; padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); background: var(--hs-bg); border-left: 1px solid var(--hs-line); }
 .hs-toc-head { padding: 22px 20px 10px; }
 .hs-toc-title { display: flex; align-items: center; gap: 8px; color: var(--hs-text); font-weight: 700; font-size: 15px; line-height: 1.4; text-decoration: none; }
 .hs-toc-title::before { content: ""; flex: none; width: 16px; height: 16px; background: var(--hs-accent); -webkit-mask: var(--hs-i-list) center / contain no-repeat; mask: var(--hs-i-list) center / contain no-repeat; }
-.hs-toc-filter { box-sizing: border-box; width: calc(100% - 24px); margin: 4px 12px 10px; padding: 7px 10px; font: 13px/1.4 var(--hs-font); color: var(--hs-text); background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 5px; }
+.hs-toc-filter { box-sizing: border-box; width: calc(100% - 24px); margin: 4px 12px 10px; padding: 7px 10px; font: 13px/1.4 var(--hs-font); color: var(--hs-text); background: transparent; border: 1px solid var(--hs-line); border-radius: 5px; }
 .hs-toc-filter::placeholder { color: var(--hs-faint); }
 .hs-toc-panel { flex: 1; min-height: 0; overflow-y: auto; padding: 0 12px 28px; overscroll-behavior: contain; }
 .hs-toc ol { list-style: none; margin: 0; padding: 0; }
-.hs-toc li { --ch: var(--hs-accent); }
-.hs-toc a { display: block; padding: 4px 8px; border-radius: 4px; color: var(--hs-muted); text-decoration: none; font-size: 13.5px; line-height: 1.45; }
-.hs-toc .hs-l2 > a { color: var(--hs-text); font-weight: 700; margin-top: 10px; }
-.hs-toc .hs-l2 > a[data-icon]::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 7px; vertical-align: -2px; background: var(--ch); -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+:where(.hs-toc li) { --ch: var(--hs-accent); }
+.hs-toc a { display: block; padding: 4px 8px; border-left: 2px solid transparent; color: var(--hs-muted); text-decoration: none; font-size: 13.5px; line-height: 1.45; }
+.hs-toc .hs-l2 > a { color: var(--ch); font-weight: 700; margin-top: 10px; }
 .hs-toc .hs-l3 > a { padding-left: 18px; }
 .hs-toc .hs-l4 > a { padding-left: 32px; font-size: 12.5px; }
-.hs-toc a:hover { background: color-mix(in srgb, var(--ch) 12%, transparent); color: var(--hs-text); }
-.hs-toc a[aria-current] { background: color-mix(in srgb, var(--ch) 16%, transparent); color: var(--ch); }
+.hs-toc a:hover { color: var(--hs-text); }
+.hs-toc a[aria-current] { color: var(--ch); border-left-color: var(--ch); }
 .hs-toc code { font-size: .92em; background: none; padding: 0; color: inherit; }
 .hs-toc .hs-num { color: var(--ch); }
 .hs-toc-empty { margin: 8px; font-size: 13px; color: var(--hs-faint); }
 .hs-toc-toggle { display: none; }
 
-/* 阅读进度、回到顶部、跳转高亮：纯 CSS */
-.hs-progress { display: none; }
+/* 回到顶部、跳转高亮：纯 CSS */
 .hs-top { position: fixed; z-index: 15; right: 24px; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); display: grid; place-items: center; width: 40px; height: 40px; font-size: 18px; color: var(--hs-accent); text-decoration: none; background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 50%; box-shadow: 0 2px 8px rgba(28, 36, 48, .08); }
 @media (min-width: 900px) { body.hs-with-toc .hs-top { right: calc(var(--hs-toc-w) + 24px); } }
 @supports (animation-timeline: scroll()) {
-  .hs-progress { display: block; position: fixed; z-index: 30; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--hs-c1), var(--hs-c2), var(--hs-c3), var(--hs-c4), var(--hs-c8)); transform-origin: 0 50%; animation: hs-grow linear both; animation-timeline: scroll(root); }
   .hs-top { animation: hs-appear linear both; animation-timeline: scroll(root); animation-range: 0 480px; }
-  @keyframes hs-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   @keyframes hs-appear { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -403,10 +395,9 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 .demo-diagram .head { fill: var(--ch); }
 </style>
 
-<div class="hs-progress" aria-hidden="true"></div>
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.2.0</p>
+  <p class="hs-meta">html-style 插件模板 · v1.3.0</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -416,19 +407,19 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     </dl>
   </blockquote>
 
-  <h2 id="s1" data-icon="book"><span class="hs-num">1.</span>字体与版心<a class="hs-anchor" href="#s1" aria-label="本节链接">#</a></h2>
-  <p>正文 Comic Sans MS 16px，行高 1.75。版心固定 988px，在大纲左侧的区域内水平居中；页面底色浅色 <code>#FCFCFB</code>、深色 <code>#151515</code>。<strong>每一章自动获得一种章节色</strong>，编号、图标块、表头、列表符号和粗体高亮都跟着变。</p>
+  <h2 id="s1">字体与版心<a class="hs-anchor" href="#s1" aria-label="本节链接">#</a></h2>
+  <p>正文 Comic Sans MS 16px，行高 1.75。版心固定 988px，在大纲左侧的区域内水平居中；页面底色浅色 <code>#FCFCFB</code>、深色 <code>#151515</code>。每一章自动获得一种<strong>章节色</strong>，标题色条、表头、列表符号和大纲当前位置都跟着变。</p>
   <div class="hs-table"><table>
     <caption>标题层级</caption>
     <thead><tr><th>元素</th><th>字号</th><th>标记</th></tr></thead>
     <tbody>
-      <tr><td><code>h2</code></td><td>24px</td><td><span class="hs-tag" data-kind="key">章节色图标块</span></td></tr>
+      <tr><td><code>h2</code></td><td>24px</td><td><span class="hs-tag" data-kind="key">章节色色条</span></td></tr>
       <tr><td><code>h3</code></td><td>20px</td><td><span class="hs-tag" data-kind="info">章节色竖条</span></td></tr>
-      <tr><td><code>h4</code></td><td>17.5px</td><td><span class="hs-tag" data-kind="muted">编号着色</span></td></tr>
+      <tr><td><code>h4</code></td><td>17.5px</td><td><span class="hs-tag" data-kind="muted">无装饰</span></td></tr>
     </tbody>
   </table></div>
 
-  <h2 id="s2" data-icon="image"><span class="hs-num">2.</span>图表<a class="hs-anchor" href="#s2" aria-label="本节链接">#</a></h2>
+  <h2 id="s2">图表<a class="hs-anchor" href="#s2" aria-label="本节链接">#</a></h2>
   <p>图表放进 <code>.hs-zoom</code>；<code>figure</code> 直接包含的图片、SVG、canvas 会被自动包进去。按 <kbd>F</kbd> 或双击进入全屏，<kbd>Esc</kbd> 退出。</p>
   <figure>
     <svg class="demo-diagram" viewBox="0 0 720 200" role="img" aria-label="三种图表操作">
@@ -448,20 +439,20 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     <figcaption><span>示例：内联 SVG 用 --hs-* 令牌配色，跟随主题</span></figcaption>
   </figure>
 
-  <h2 id="s3" data-icon="flag"><span class="hs-num">3.</span>标记与原生增强<a class="hs-anchor" href="#s3" aria-label="本节链接">#</a></h2>
-  <h3 id="s3-1"><span class="hs-num">3.1</span>状态、记号与 ID<a class="hs-anchor" href="#s3-1" aria-label="本节链接">#</a></h3>
+  <h2 id="s3">标记与原生增强<a class="hs-anchor" href="#s3" aria-label="本节链接">#</a></h2>
+  <h3 id="s3-1">状态、记号与 ID<a class="hs-anchor" href="#s3-1" aria-label="本节链接">#</a></h3>
   <p>状态词用标签：<span class="hs-tag" data-kind="ok">已修</span> <span class="hs-tag" data-kind="warn">未做</span> <span class="hs-tag" data-kind="danger">已删除</span> <span class="hs-tag" data-kind="info">新增</span>。图例符号用记号：<span class="hs-mark" data-kind="ok" title="承接">=</span> 承接、<span class="hs-mark" data-kind="warn" title="换表达">≈</span> 换表达、<span class="hs-mark" data-kind="danger" title="缺口">△</span> 缺口。行内 ID 自动着色，同前缀同色：<code>RT-01</code>、<code>RT-02</code>、<code>SW-R1.7</code>、<code>G15</code>。</p>
   <blockquote class="hs-callout" data-kind="warn">
     <p class="hs-callout-title">注意</p>
     <p>能用原生 HTML / CSS 实现的交互，不要再写脚本。颜色必须编码含义，不做纯装饰。</p>
   </blockquote>
 
-  <h3 id="s3-2"><span class="hs-num">3.2</span>术语与折叠<a class="hs-anchor" href="#s3-2" aria-label="本节链接">#</a></h3>
+  <h3 id="s3-2">术语与折叠<a class="hs-anchor" href="#s3-2" aria-label="本节链接">#</a></h3>
   <dl>
     <dt>版心</dt><dd>正文所在的固定宽度区域。</dd>
     <dt><abbr title="Table of Contents">TOC</abbr></dt><dd>右侧大纲，可筛选，随滚动高亮当前章节。</dd>
   </dl>
-  <p>重点句可以用 <mark>高亮</mark>；脚注用原生弹层<button type="button" class="hs-ref" popovertarget="fn-1">1</button>，不需要脚本。行内图标：<i class="hs-ico" data-icon="database"></i> 数据、<i class="hs-ico" data-icon="flow"></i> 流程。</p>
+  <p>强调二选一：术语、关键词用<strong>加粗</strong>；需要一眼扫到的结论句用<mark>高亮，背景覆盖整段文字</mark>；同一处不要既加粗又高亮。脚注用原生弹层<button type="button" class="hs-ref" popovertarget="fn-1">1</button>，不需要脚本。行内图标：<i class="hs-ico" data-icon="database"></i> 数据、<i class="hs-ico" data-icon="flow"></i> 流程。</p>
   <div popover id="fn-1" class="hs-pop">原生 <code>popover</code> 属性配合 <code>popovertarget</code> 按钮即可开合，点击空白处或按 Esc 关闭。</div>
   <details class="hs-code" open>
     <summary><span class="hs-code-lang">HTML</span><span class="hs-code-meta">4 行</span></summary>
@@ -547,7 +538,6 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       const a = document.createElement('a');
       a.href = '#' + h.id;
       a.innerHTML = plainLabel(h).innerHTML;
-      if (h.dataset.icon) a.dataset.icon = h.dataset.icon;
       li.append(a);
       list.append(li);
       return a;
