@@ -328,6 +328,61 @@ body {
   }
 
   // ---------- 图表视窗：左/右键拖动，滚轮定点缩放，双指缩放，双击复位 ----------
+  const bindZoomInput = (frame, view) => {
+    const points = new Map();
+    let pinch = null;
+    frame.addEventListener('pointerdown', e => {
+      if (e.target.closest('button')) return;
+      if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
+      e.preventDefault();
+      frame.setPointerCapture(e.pointerId);
+      points.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      frame.classList.add('is-dragging');
+      if (points.size === 2) {
+        const [a, b] = [...points.values()];
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, s: view.scale() };
+      }
+    });
+    frame.addEventListener('pointermove', e => {
+      const p = points.get(e.pointerId);
+      if (!p) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y;
+      p.x = e.clientX;
+      p.y = e.clientY;
+      if (!pinch) { view.pan(dx, dy); return; }
+      // 双指：中点跟随手指平移，再以中点为锚按指距比例缩放
+      const [a, b] = [...points.values()];
+      const r = frame.getBoundingClientRect();
+      view.pan(dx / 2, dy / 2);
+      view.zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, pinch.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d);
+    });
+    const release = e => {
+      points.delete(e.pointerId);
+      if (points.size < 2) pinch = null;
+      if (!points.size) frame.classList.remove('is-dragging');
+    };
+    frame.addEventListener('pointerup', release);
+    frame.addEventListener('pointercancel', release);
+    frame.addEventListener('contextmenu', e => e.preventDefault());
+    frame.addEventListener('dblclick', e => { if (!e.target.closest('button')) view.reset(); });
+    frame.addEventListener('wheel', e => {
+      e.preventDefault();
+      const r = frame.getBoundingClientRect();
+      const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? r.height : 1;
+      view.zoomAt(e.clientX - r.left, e.clientY - r.top, view.scale() * Math.exp(-e.deltaY * unit * (e.ctrlKey ? 0.01 : 0.0015)));
+    }, { passive: false });
+    const arrows = { ArrowLeft: [48, 0], ArrowRight: [-48, 0], ArrowUp: [0, 48], ArrowDown: [0, -48] };
+    frame.addEventListener('keydown', e => {
+      const cx = frame.clientWidth / 2, cy = frame.clientHeight / 2;
+      if (e.key === '+' || e.key === '=') view.zoomAt(cx, cy, view.scale() * 1.25);
+      else if (e.key === '-') view.zoomAt(cx, cy, view.scale() / 1.25);
+      else if (e.key === '0') view.reset();
+      else if (arrows[e.key]) view.pan(...arrows[e.key]);
+      else return;
+      e.preventDefault();
+    });
+  };
+
   const initZoom = frame => {
     if (frame.dataset.hsReady) return;
     const el = frame.querySelector(':scope > img, :scope > svg, :scope > canvas');
@@ -372,6 +427,12 @@ body {
       touched = true;
       render();
     };
+    const pan = (dx, dy) => {
+      x += dx;
+      y += dy;
+      touched = true;
+      render();
+    };
 
     const start = () => {
       if (!measure()) return;
@@ -397,62 +458,8 @@ body {
         if (!touched) reset();
       }).observe(frame);
       reset();
+      bindZoomInput(frame, { scale: () => s, pan, zoomAt, reset });
     };
-
-    const points = new Map();
-    let pinch = null;
-    frame.addEventListener('pointerdown', e => {
-      if (e.target.closest('button')) return;
-      if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
-      e.preventDefault();
-      frame.setPointerCapture(e.pointerId);
-      points.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      frame.classList.add('is-dragging');
-      if (points.size === 2) {
-        const [a, b] = [...points.values()];
-        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, s };
-      }
-    });
-    frame.addEventListener('pointermove', e => {
-      const p = points.get(e.pointerId);
-      if (!p) return;
-      const dx = e.clientX - p.x, dy = e.clientY - p.y;
-      p.x = e.clientX;
-      p.y = e.clientY;
-      if (points.size === 1 || !pinch) { x += dx; y += dy; touched = true; render(); return; }
-      const [a, b] = [...points.values()];
-      const r = frame.getBoundingClientRect();
-      x += dx / 2;
-      y += dy / 2;
-      zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, pinch.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d);
-    });
-    const release = e => {
-      points.delete(e.pointerId);
-      if (points.size < 2) pinch = null;
-      if (!points.size) frame.classList.remove('is-dragging');
-    };
-    frame.addEventListener('pointerup', release);
-    frame.addEventListener('pointercancel', release);
-    frame.addEventListener('contextmenu', e => e.preventDefault());
-    frame.addEventListener('dblclick', e => { if (!e.target.closest('button')) reset(); });
-    frame.addEventListener('wheel', e => {
-      e.preventDefault();
-      const r = frame.getBoundingClientRect();
-      const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? r.height : 1;
-      zoomAt(e.clientX - r.left, e.clientY - r.top, s * Math.exp(-e.deltaY * unit * (e.ctrlKey ? 0.01 : 0.0015)));
-    }, { passive: false });
-    frame.addEventListener('keydown', e => {
-      const cx = frame.clientWidth / 2, cy = frame.clientHeight / 2, step = 48;
-      if (e.key === '+' || e.key === '=') zoomAt(cx, cy, s * 1.25);
-      else if (e.key === '-') zoomAt(cx, cy, s / 1.25);
-      else if (e.key === '0') reset();
-      else if (e.key === 'ArrowLeft') { x += step; touched = true; render(); }
-      else if (e.key === 'ArrowRight') { x -= step; touched = true; render(); }
-      else if (e.key === 'ArrowUp') { y += step; touched = true; render(); }
-      else if (e.key === 'ArrowDown') { y -= step; touched = true; render(); }
-      else return;
-      e.preventDefault();
-    });
 
     if (el.tagName === 'IMG' && !el.complete) el.addEventListener('load', start, { once: true });
     else start();
