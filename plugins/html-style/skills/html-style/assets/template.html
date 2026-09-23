@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.6.2 模板
+  html-style v1.6.3 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -216,7 +216,7 @@
 [data-icon="fold"] { --icon: var(--hs-i-fold); }
 .hs-ico { display: inline-block; width: 1.1em; height: 1.1em; vertical-align: -.18em; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
 
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* 所有页内跳转（链接点击、回到顶部、浏览器前进后退）都直接跳转：不设 scroll-behavior: smooth */
 body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.75 var(--hs-font); -webkit-text-size-adjust: 100%; }
 :focus-visible { outline: 2px solid var(--hs-accent); outline-offset: 2px; }
 
@@ -397,7 +397,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.6.2</p>
+  <p class="hs-meta">html-style 插件模板 · v1.6.3</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -578,7 +578,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     const filter = nav.querySelector('.hs-toc-filter');
     const empty = nav.querySelector('.hs-toc-empty');
     const fold = nav.querySelector('.hs-toc-fold');
-    let expanded = false, current = -1, queued = false, pinned = -1, pinnedUntil = 0;
+    let expanded = false, current = -1, queued = false, pinned = -1;
 
     const pathOf = i => {
       const path = new Set();
@@ -616,12 +616,12 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       fold.title = label;
       return markCurrent();
     };
-    // 点击大纲后锁定所点条目，直到用户自己滚动，或该标题离开视口（点击后 1.2 秒内平滑滚动不算）
+    // 点击大纲后锁定所点条目，直到用户自己滚动，或该标题离开视口
     const spy = () => {
       queued = false;
       if (pinned >= 0) {
         const t = items[pinned].head.getBoundingClientRect().top;
-        if (performance.now() > pinnedUntil && (t < -40 || t > innerHeight)) pinned = -1;
+        if (t < -40 || t > innerHeight) pinned = -1;
       }
       const idx = pinned >= 0 ? pinned : locateHeading(items);
       if (idx === current) return;
@@ -638,8 +638,8 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
       const idx = items.findIndex(x => x.a === e.target.closest('a'));
       if (idx < 0) return;
       pinned = idx;
-      pinnedUntil = performance.now() + 1200;
-      spy();
+      // 点击时跳转尚未发生，等锚点跳转完成后再定位
+      setTimeout(spy);
     });
     addEventListener('wheel', unpin, { passive: true });
     addEventListener('touchstart', unpin, { passive: true });
@@ -648,14 +648,6 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     render();
     spy();
   };
-
-  // 页内锚点链接（大纲、正文、表格里的 #链接）直接跳转，不做平滑滚动；回到顶部按钮保留平滑滚动
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a || a.classList.contains('hs-top')) return;
-    document.documentElement.style.scrollBehavior = 'auto';
-    setTimeout(() => { document.documentElement.style.scrollBehavior = ''; });
-  });
 
   markIds();
   const levels =(doc.dataset.tocLevels || '2,3').split(',').map(n => 'h' + n.trim()).join(',');
