@@ -1,6 +1,6 @@
 <title>HTML 样式规范</title>
 <!--
-  html-style v1.6.1 模板
+  html-style v1.6.2 模板
   - 字体链接、样式块 hs-style、脚本块 hs-script，以及回到顶部标记，原样复制，不要改写或删减。
   - 页面内容全部写在 main.hs-doc 里；大纲、ID 着色由脚本完成，不要手写。
   - 页面特有样式另起一个 style 块，只用 --hs-* 令牌取色。
@@ -397,7 +397,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
 
 <main class="hs-doc" data-toc-levels="2,3">
   <h1 id="top">HTML 样式规范</h1>
-  <p class="hs-meta">html-style 插件模板 · v1.6.1</p>
+  <p class="hs-meta">html-style 插件模板 · v1.6.2</p>
 
   <blockquote class="hs-callout" data-kind="info">
     <p class="hs-callout-title">文档说明</p>
@@ -635,12 +635,7 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     fold.addEventListener('click', () => { expanded = !expanded; keepVisible(render()); });
     filter.addEventListener('input', render);
     nav.addEventListener('click', e => {
-      const a = e.target.closest('a');
-      if (!a) return;
-      // 大纲跳转不做平滑滚动：本次锚点导航期间临时关闭 scroll-behavior
-      document.documentElement.style.scrollBehavior = 'auto';
-      setTimeout(() => { document.documentElement.style.scrollBehavior = ''; });
-      const idx = items.findIndex(x => x.a === a);
+      const idx = items.findIndex(x => x.a === e.target.closest('a'));
       if (idx < 0) return;
       pinned = idx;
       pinnedUntil = performance.now() + 1200;
@@ -654,8 +649,16 @@ body { margin: 0; background: var(--hs-bg); color: var(--hs-text); font: 16px/1.
     spy();
   };
 
+  // 页内锚点链接（大纲、正文、表格里的 #链接）直接跳转，不做平滑滚动；回到顶部按钮保留平滑滚动
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || a.classList.contains('hs-top')) return;
+    document.documentElement.style.scrollBehavior = 'auto';
+    setTimeout(() => { document.documentElement.style.scrollBehavior = ''; });
+  });
+
   markIds();
-  const levels = (doc.dataset.tocLevels || '2,3').split(',').map(n => 'h' + n.trim()).join(',');
+  const levels =(doc.dataset.tocLevels || '2,3').split(',').map(n => 'h' + n.trim()).join(',');
   const heads = [...doc.querySelectorAll(levels)].filter(h => !h.closest('figure, details, .hs-no-toc'));
   if (heads.length) {
     const toc = createToc(heads);
