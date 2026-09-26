@@ -24,10 +24,33 @@
 
 ## 安装
 
+下文 `<市场来源>` 二选一：
+
+- GitHub：`crvsrvn/HTML-Style-AIPlugin`（也可以传 HTTPS / SSH 地址）
+- 本地克隆：仓库根目录的绝对路径，即包含 `.claude-plugin/marketplace.json` 的目录
+
+### 让 AI 安装（推荐）
+
+在 Claude Code 或 Codex 里直接说：
+
+```text
+按 README 安装这个插件：https://github.com/crvsrvn/HTML-Style-AIPlugin
+```
+
+也可以把链接换成本地克隆的路径。
+
+> **给执行安装的 AI**
+>
+> 1. 判断当前平台是 Claude Code 还是 Codex，只执行对应平台的命令。
+> 2. 确定 `<市场来源>`：用户给的是 GitHub 地址就直接用；给的是本地路径就先解析成绝对路径，并确认其中存在 `.claude-plugin/marketplace.json`（Codex 为 `.agents/plugins/marketplace.json`）。不要沿用任何示例路径。
+> 3. `claude` / `codex` 不在 PATH 时，先定位本机的 CLI 可执行文件再调用（例如 Claude 桌面版自带的 CLI），不要假设固定路径。
+> 4. 市场已添加过时，跳过添加这一步，直接执行安装；已安装过则按「更新」一节重装。
+> 5. 完成后告诉用户：开始新的对话 / 任务后生效。
+
 ### Claude Code
 
 ```bash
-claude plugin marketplace add E:\Repositories\HTML-Style-AIPlugin
+claude plugin marketplace add <市场来源>
 claude plugin install html-style@html-style-aiplugin
 ```
 
@@ -35,28 +58,12 @@ claude plugin install html-style@html-style-aiplugin
 
 ### Codex
 
-```powershell
-codex plugin marketplace add "E:\Repositories\HTML-Style-AIPlugin"
-codex plugin add html-style@html-style-aiplugin
-```
-
-安装后开始新的 Codex 任务即可生效。
-
-### 通过 Git 分享
-
-仓库推到 Git 服务后，接收方直接添加仓库市场：
-
 ```bash
-# Claude Code
-claude plugin marketplace add OWNER/HTML-Style-AIPlugin
-claude plugin install html-style@html-style-aiplugin
-
-# Codex
-codex plugin marketplace add OWNER/HTML-Style-AIPlugin --ref main
+codex plugin marketplace add <市场来源>
 codex plugin add html-style@html-style-aiplugin
 ```
 
-把 `OWNER` 换成实际的 GitHub 组织或用户名，也可以传 HTTPS / SSH 地址。
+来源是 Git 仓库时可加 `--ref main` 指定分支。安装后开始新的 Codex 任务即可生效。
 
 ### 更新
 
