@@ -133,7 +133,7 @@ description: 创建、修改、重排或发布任何 HTML 成品时必须使用�
   - 更新已有 Artifact 时传同一个 `url`，或在同一会话里用同一个文件路径，保持链接不变。
   - 遵守该工具的页面契约：不写 doctype / html / head / body；外部样式只从 Google Fonts 加载。
 - **claude.ai 网页**：直接产出 HTML Artifact。
-- **Codex**：有 `sites-hosting`（配合 `sites-building`）等托管技能时，用它发布并给出链接。没有可用的托管能力时，明确告诉用户"当前环境无法托管"，给出临时目录里的文件路径，不要声称已发布。
+- **Codex 及其他宿主**：有托管技能时（如 Codex 的 `sites-hosting`，配合 `sites-building`），用它发布并给出链接。没有可用的托管能力时，明确告诉用户"当前环境无法托管"，给出临时目录里的文件路径，不要声称已发布。
 - 用户明确要求本地文件时，按用户要求交付。
 
 ## 发布前自检

@@ -24,10 +24,12 @@
 
 ## 安装
 
-下文 `<市场来源>` 二选一：
+Claude Code 与 Codex 用插件市场安装；其他工具见[仅安装 Skill](#仅安装-skill)。下文 `<市场来源>` 二选一：
 
-- GitHub：`crvsrvn/HTML-Style-AIPlugin`（也可以传 HTTPS / SSH 地址）
-- 本地克隆：仓库根目录的绝对路径，即包含 `.claude-plugin/marketplace.json` 的目录
+- GitHub：`crvsrvn/HTML-Style-AIPlugin`，或 fork 后的 `<owner>/<repo>`；也可以传 HTTPS / SSH 克隆地址。
+- 本地目录：仓库克隆或解压后的根目录，即包含 `.claude-plugin/marketplace.json` 的目录，放在哪里都可以。写绝对路径；Claude Code 也接受以 `./`、`../` 开头的相对路径，不带前缀会被当成 GitHub 的 `owner/repo`。
+
+固定到某个分支或标签时：Claude Code 在来源后加 `#<ref>`；Codex 用 `owner/repo@<ref>`，或加 `--ref <ref>`。
 
 ### 让 AI 安装（推荐）
 
@@ -41,11 +43,12 @@
 
 > **给执行安装的 AI**
 >
-> 1. 判断当前平台是 Claude Code 还是 Codex，只执行对应平台的命令。
+> 1. 判断当前平台是 Claude Code 还是 Codex，只执行对应平台的命令；都不是时按「仅安装 Skill」一节处理。
 > 2. 确定 `<市场来源>`：用户给的是 GitHub 地址就直接用；给的是本地路径就先解析成绝对路径，并确认其中存在 `.claude-plugin/marketplace.json`（Codex 为 `.agents/plugins/marketplace.json`）。不要沿用任何示例路径。
 > 3. `claude` / `codex` 不在 PATH 时，先定位本机的 CLI 可执行文件再调用（例如 Claude 桌面版自带的 CLI），不要假设固定路径。
-> 4. 市场已添加过时，跳过添加这一步，直接执行安装；已安装过则按「更新」一节重装。
-> 5. 完成后告诉用户：开始新的对话 / 任务后生效。
+> 4. 市场已用同一来源添加过时，跳过添加这一步；来源不同（例如从本地路径换成 GitHub）时，先移除旧市场（`claude` 或 `codex` 加 `plugin marketplace remove html-style-aiplugin`）再添加。已安装过则按「更新」一节操作。
+> 5. Codex CLI 没有 `codex plugin add` 子命令时（较旧版本），添加市场后请用户在 Codex 里用 `/plugins` 安装。
+> 6. 完成后告诉用户：开始新的对话 / 任务后生效。
 
 ### Claude Code
 
@@ -54,7 +57,7 @@ claude plugin marketplace add <市场来源>
 claude plugin install html-style@html-style-aiplugin
 ```
 
-桌面版对应 `/plugin marketplace add`、`/plugin install` 两条斜杠命令。安装后开始新的对话即可生效。
+默认装到用户级，所有项目都可用。桌面版 Code 标签页与 CLI 共用同一份用户设置：用上面的命令添加市场后，也可以在输入框旁的 **+** → **Plugins** → **Add plugin** 里安装。安装后开始新的对话即可生效。
 
 ### Codex
 
@@ -63,18 +66,32 @@ codex plugin marketplace add <市场来源>
 codex plugin add html-style@html-style-aiplugin
 ```
 
-来源是 Git 仓库时可加 `--ref main` 指定分支。安装后开始新的 Codex 任务即可生效。
+较旧的 Codex CLI 没有 `codex plugin add`，添加市场后在 Codex 里用 `/plugins` 安装。安装后开始新的 Codex 任务即可生效。
+
+### 仅安装 Skill
+
+插件只含一个 Skill 目录（`SKILL.md` + `assets/template.html`），不依赖安装位置，可以不经插件系统直接使用，适合其他支持 Agent Skills（`SKILL.md`）的工具：
+
+- 本地工具：把 `plugins/html-style/skills/html-style/` 整个目录复制到该工具的用户级 Skills 目录，目录名保持 `html-style`，例如 Claude Code 的 `~/.claude/skills/html-style/`；其他工具的目录以其文档为准。
+- claude.ai：把该目录打包成 ZIP，在 **Customize** → **Skills** 里上传（需开启代码执行）。
+
+与插件安装二选一，避免同一个 Skill 加载两份。更新时重新复制或上传。
 
 ### 更新
 
-两个平台安装的都是插件快照。改动仓库后需要重装才能生效：
+Claude Code：
 
 ```bash
-claude plugin uninstall html-style@html-style-aiplugin
-claude plugin install html-style@html-style-aiplugin
+claude plugin marketplace update html-style-aiplugin
+claude plugin update html-style@html-style-aiplugin
 ```
 
-```powershell
+`claude plugin update` 按插件清单里的版本号判断有没有新版本，版本号没变时不会更新。
+
+Codex 安装的是快照，先刷新市场（仅 Git 来源需要第一条），再重装：
+
+```bash
+codex plugin marketplace upgrade html-style-aiplugin
 codex plugin remove html-style@html-style-aiplugin
 codex plugin add html-style@html-style-aiplugin
 ```
@@ -99,7 +116,7 @@ plugins/html-style/
 ## 维护
 
 - 改样式或脚本时只改 `template.html`，同步更新 `SKILL.md` 里的规则。
-- 四个清单文件里的版本号保持一致。
+- 每次发布改动都提升版本号，否则 Claude Code 不会更新已安装的插件；各清单文件与 `template.html` 里的版本号保持一致。
 
 ## 许可证
 
